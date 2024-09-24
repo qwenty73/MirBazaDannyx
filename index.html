@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editable Database</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Редактирование базы данных</h1>
+
+    <!-- Форма для добавления данных -->
+    <form id="data-form">
+        <label for="name">Название:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="value">Значение:</label>
+        <input type="text" id="value" name="value" required>
+        <button type="submit">Сохранить</button>
+    </form>
+
+    <h2>Текущие записи:</h2>
+    <ul id="data-list"></ul> <!-- Список данных из Firestore -->
+
+    <script type="module" src="app.js"></script> <!-- Подключение JS -->
+</body>
+</html>
