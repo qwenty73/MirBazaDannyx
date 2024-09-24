@@ -52,6 +52,11 @@ closeImageModalBtn.addEventListener('click', () => {
   imageModal.style.display = 'none';
 });
 
+// Закрытие модального окна при клике на изображение
+modalImage.addEventListener('click', () => {
+  imageModal.style.display = 'none';
+});
+
 // Функция для автоматического получения следующего номера
 async function getNextNumber() {
   const q = query(collection(db, "data"), orderBy("number", "desc"), limit(1));
@@ -173,7 +178,6 @@ async function loadData() {
     });
   });
 
-  // Добавляем возможность редактирования ячеек
   document.querySelectorAll('.editable').forEach(cell => {
     cell.addEventListener('click', handleCellEdit);
   });
@@ -223,7 +227,18 @@ function handleCellEdit(event) {
   });
 }
 
-// Функция для редактирования записи
+// Функция для удаления данных
+async function deleteData(docId) {
+  try {
+    await deleteDoc(doc(db, "data", docId));
+    loadData();
+  } catch (e) {
+    console.error("Ошибка при удалении документа: ", e);
+    alert("Ошибка при удалении данных.");
+  }
+}
+
+// Функция для редактирования данных
 async function editData(docId) {
   const docRef = doc(db, "data", docId);
   const docSnap = await getDoc(docRef);
@@ -235,22 +250,10 @@ async function editData(docId) {
     const incomingField = document.querySelector(`td[data-id='${docId}'][data-field='incoming']`);
     const outgoingField = document.querySelector(`td[data-id='${docId}'][data-field='outgoing']`);
 
-    // Устанавливаем поля для редактирования
     nameField.innerHTML = `<input type="text" value="${data.name}">`;
     initialBalanceField.innerHTML = `<input type="number" value="${data.initialBalance}">`;
     incomingField.innerHTML = `<input type="number" value="${data.incoming}">`;
     outgoingField.innerHTML = `<input type="number" value="${data.outgoing}">`;
-  }
-}
-
-// Функция для удаления данных
-async function deleteData(docId) {
-  try {
-    await deleteDoc(doc(db, "data", docId));
-    loadData();
-  } catch (e) {
-    console.error("Ошибка при удалении документа: ", e);
-    alert("Ошибка при удалении данных.");
   }
 }
 
