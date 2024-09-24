@@ -33,7 +33,7 @@ closeModalBtn.addEventListener('click', () => {
 async function addData(number, name, initialBalance, incoming, outgoing, finalBalance) {
   try {
     await addDoc(collection(db, "data"), {
-      number: number,
+      number: number,  // сохраняем номер
       name: name,
       initialBalance: initialBalance,
       incoming: incoming,
@@ -56,11 +56,11 @@ async function loadData() {
     const dataList = document.getElementById('data-list');
     dataList.innerHTML = ''; // Очищаем текущий список
 
-    querySnapshot.forEach((doc, index) => {
+    querySnapshot.forEach((doc) => {
       const data = doc.data();
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td>${index + 1}</td> <!-- Порядковый номер -->
+        <td>${data.number}</td> <!-- Правильный номер из базы данных -->
         <td>${data.name}</td>
         <td>${data.initialBalance}</td>
         <td>${data.incoming}</td>
