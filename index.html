@@ -9,6 +9,10 @@
 <body>
     <h1>Редактирование базы данных</h1>
 
+    <!-- Кнопка для авторизации -->
+    <button id="login-btn">Войти</button>
+    <button id="logout-btn" style="display:none;">Выйти</button>
+
     <!-- Форма для добавления данных -->
     <form id="data-form">
         <label for="name">Название:</label>
@@ -17,6 +21,9 @@
         <input type="text" id="value" name="value" required>
         <button type="submit">Сохранить</button>
     </form>
+
+    <!-- Уведомления -->
+    <p id="notification" style="color: green; display: none;"></p>
 
     <h2>Текущие записи:</h2>
     <ul id="data-list"></ul> <!-- Список данных из Firestore -->
