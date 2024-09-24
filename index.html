@@ -11,12 +11,24 @@
     <!-- Форма для добавления данных -->
     <div class="form-container">
         <form id="data-form">
-            <label for="name">Название:</label>
-            <input type="text" id="name" name="name" required>
-            <br><br>
-            <label for="value">Значение:</label>
-            <input type="text" id="value" name="value" required>
-            <br><br>
+            <label for="number">Номер:</label>
+            <input type="number" id="number" name="number" required><br><br>
+            
+            <label for="name">Наименование:</label>
+            <input type="text" id="name" name="name" required><br><br>
+
+            <label for="initial-balance">Начальный остаток:</label>
+            <input type="number" id="initial-balance" name="initial-balance" required><br><br>
+
+            <label for="incoming">Приход:</label>
+            <input type="number" id="incoming" name="incoming" required><br><br>
+
+            <label for="outgoing">Расход:</label>
+            <input type="number" id="outgoing" name="outgoing" required><br><br>
+
+            <label for="final-balance">Конечный остаток:</label>
+            <input type="number" id="final-balance" name="final-balance" readonly><br><br>
+
             <button type="submit">Сохранить</button>
         </form>
     </div>
@@ -47,11 +59,15 @@
       const db = getFirestore(app);
 
       // Функция для добавления данных в Firestore
-      async function addData(name, value) {
+      async function addData(number, name, initialBalance, incoming, outgoing, finalBalance) {
         try {
           const docRef = await addDoc(collection(db, "data"), {
+            number: number,
             name: name,
-            value: value
+            initialBalance: initialBalance,
+            incoming: incoming,
+            outgoing: outgoing,
+            finalBalance: finalBalance
           });
           console.log("Документ добавлен с ID: ", docRef.id);
           loadData(); // Обновляем список данных
@@ -70,7 +86,7 @@
           const data = doc.data();
           const listItem = document.createElement('li');
           listItem.innerHTML = `
-            <span>${data.name}: ${data.value}</span>
+            <span>№ ${data.number}: ${data.name} | Начальный остаток: ${data.initialBalance}, Приход: ${data.incoming}, Расход: ${data.outgoing}, Конечный остаток: ${data.finalBalance}</span>
             <button class="delete-button" data-id="${doc.id}">Удалить</button>
           `;
           dataList.appendChild(listItem);
@@ -101,17 +117,23 @@
         e.preventDefault(); // Предотвращаем отправку формы по умолчанию
 
         // Получаем значения из полей формы
+        const number = document.getElementById('number').value;
         const name = document.getElementById('name').value;
-        const value = document.getElementById('value').value;
+        const initialBalance = parseFloat(document.getElementById('initial-balance').value);
+        const incoming = parseFloat(document.getElementById('incoming').value);
+        const outgoing = parseFloat(document.getElementById('outgoing').value);
+        const finalBalance = initialBalance + incoming - outgoing;
 
-        if (name && value) {
-          // Добавляем данные в Firestore
-          addData(name, value);
+        // Добавляем данные в Firestore
+        addData(number, name, initialBalance, incoming, outgoing, finalBalance);
 
-          // Очищаем поля формы после отправки
-          document.getElementById('name').value = '';
-          document.getElementById('value').value = '';
-        }
+        // Очищаем поля формы после отправки
+        document.getElementById('number').value = '';
+        document.getElementById('name').value = '';
+        document.getElementById('initial-balance').value = '';
+        document.getElementById('incoming').value = '';
+        document.getElementById('outgoing').value = '';
+        document.getElementById('final-balance').value = '';
       });
 
       // Загружаем данные при старте страницы
