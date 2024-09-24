@@ -41,39 +41,45 @@ async function addData(number, name, initialBalance, incoming, outgoing, finalBa
       finalBalance: finalBalance
     });
     loadData(); // Обновляем список данных
+    modal.style.display = 'none'; // Закрываем модальное окно после успешного добавления
   } catch (e) {
     console.error("Ошибка при добавлении документа: ", e);
+    alert("Ошибка при добавлении данных.");
   }
 }
 
 // Функция для загрузки данных из Firestore
 async function loadData() {
-  const querySnapshot = await getDocs(collection(db, "data"));
-  const dataList = document.getElementById('data-list');
-  dataList.innerHTML = ''; // Очищаем текущий список
+  try {
+    const querySnapshot = await getDocs(collection(db, "data"));
+    const dataList = document.getElementById('data-list');
+    dataList.innerHTML = ''; // Очищаем текущий список
 
-  querySnapshot.forEach((doc) => {
-    const data = doc.data();
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${data.number}</td>
-      <td>${data.name}</td>
-      <td>${data.initialBalance}</td>
-      <td>${data.incoming}</td>
-      <td>${data.outgoing}</td>
-      <td>${data.finalBalance}</td>
-      <td><button class="delete-button" data-id="${doc.id}">Удалить</button></td>
-    `;
-    dataList.appendChild(row);
-  });
-
-  // Добавляем обработчик событий для всех кнопок "Удалить"
-  document.querySelectorAll('.delete-button').forEach(button => {
-    button.addEventListener('click', function() {
-      const docId = this.getAttribute('data-id');
-      deleteData(docId);
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${data.number}</td>
+        <td>${data.name}</td>
+        <td>${data.initialBalance}</td>
+        <td>${data.incoming}</td>
+        <td>${data.outgoing}</td>
+        <td>${data.finalBalance}</td>
+        <td><button class="delete-button" data-id="${doc.id}">Удалить</button></td>
+      `;
+      dataList.appendChild(row);
     });
-  });
+
+    // Добавляем обработчик событий для всех кнопок "Удалить"
+    document.querySelectorAll('.delete-button').forEach(button => {
+      button.addEventListener('click', function() {
+        const docId = this.getAttribute('data-id');
+        deleteData(docId);
+      });
+    });
+  } catch (e) {
+    console.error("Ошибка при загрузке данных: ", e);
+  }
 }
 
 // Функция для удаления данных
@@ -83,6 +89,7 @@ async function deleteData(docId) {
     loadData(); // Обновляем список данных
   } catch (e) {
     console.error("Ошибка при удалении документа: ", e);
+    alert("Ошибка при удалении данных.");
   }
 }
 
@@ -96,13 +103,16 @@ document.getElementById('data-form').addEventListener('submit', function(e) {
   const initialBalance = parseFloat(document.getElementById('initial-balance').value);
   const incoming = parseFloat(document.getElementById('incoming').value);
   const outgoing = parseFloat(document.getElementById('outgoing').value);
+
+  if (!number || !name || isNaN(initialBalance) || isNaN(incoming) || isNaN(outgoing)) {
+    alert('Пожалуйста, заполните все поля правильно.');
+    return;
+  }
+
   const finalBalance = initialBalance + incoming - outgoing;
 
   // Добавляем данные в Firestore
   addData(number, name, initialBalance, incoming, outgoing, finalBalance);
-
-  // Закрываем модальное окно после сохранения
-  modal.style.display = 'none';
 
   // Очищаем поля формы
   document.getElementById('number').value = '';
