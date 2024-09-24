@@ -21,12 +21,14 @@ const modal = document.getElementById('modal');
 const openModalBtn = document.getElementById('open-modal');
 const closeModalBtn = document.getElementById('close-modal');
 
+// Открытие модального окна для добавления новой записи
 openModalBtn.addEventListener('click', async () => {
   const nextNumber = await getNextNumber(); // Получаем следующий номер
   document.getElementById('number').value = nextNumber; // Устанавливаем значение в поле номера
   modal.style.display = 'flex';
 });
 
+// Закрытие модального окна
 closeModalBtn.addEventListener('click', () => {
   modal.style.display = 'none';
 });
@@ -173,7 +175,7 @@ document.getElementById('data-form').addEventListener('submit', async function(e
   const finalBalance = initialBalance + incoming - outgoing;
 
   // Добавляем данные в Firestore
-  addData(number, name, initialBalance, incoming, outgoing, finalBalance);
+  await addData(number, name, initialBalance, incoming, outgoing, finalBalance);
 
   // Очищаем поля формы
   document.getElementById('number').value = '';
