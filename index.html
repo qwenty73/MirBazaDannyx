@@ -9,7 +9,15 @@
 </head>
 <body>
     <header>
-        <h1>Управление запасами</h1>
+        <div class="header-container">
+            <div class="user-info">
+                Имя пользователя: <span id="username-display">Неизвестно</span>
+            </div>
+            <h1>Управление запасами</h1>
+            <div class="company-info">
+                Название компании: <span id="company-name">Lift Master</span>
+            </div>
+        </div>
     </header>
 
     <main>
@@ -20,37 +28,33 @@
         </div>
 
         <!-- Таблица для отображения текущих записей -->
-        <table id="data-table">
-            <thead>
-                <tr>
-                    <th>Номер</th>
-                    <th>Наименование</th>
-                    <th>Начальный остаток</th>
-                    <th>Приход</th>
-                    <th>Расход</th>
-                    <th>Конечный остаток</th>
-                    <th>Изображение</th>
-                    <th>Действие</th>
-                </tr>
-            </thead>
-            <tbody id="data-list">
-                <!-- Здесь будут отображаться данные -->
-            </tbody>
-        </table>
-
-        <!-- Модальное окно для отображения увеличенного изображения -->
-        <div class="image-modal" id="image-modal">
-            <span class="close-image-modal" id="close-image-modal">&times;</span>
-            <img class="modal-content" id="modal-image">
+        <div class="table-container">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th>Номер</th>
+                        <th>Наименование</th>
+                        <th>Начальный остаток</th>
+                        <th>Приход</th>
+                        <th>Расход</th>
+                        <th>Конечный остаток</th>
+                        <th>Изображение</th>
+                        <th>Дата изменения</th>
+                        <th>Действие</th>
+                    </tr>
+                </thead>
+                <tbody id="data-list">
+                    <!-- Данные будут динамически подгружаться сюда -->
+                </tbody>
+            </table>
         </div>
 
         <!-- Модальное окно для добавления данных -->
         <div class="modal" id="modal">
             <div class="modal-content">
                 <span class="close-modal" id="close-modal">&times;</span>
-                <h2>Добавить/Редактировать запись</h2>
+                <h2>Добавить новую запись</h2>
                 <form id="data-form">
-                    <input type="hidden" id="doc-id">
                     <label for="number">Номер:</label>
                     <input type="number" id="number" name="number" readonly><br><br>
                     
@@ -66,7 +70,6 @@
                     <label for="outgoing">Расход:</label>
                     <input type="number" id="outgoing" name="outgoing" required><br><br>
 
-                    <!-- Поле для загрузки изображения -->
                     <label for="image">Выберите изображение:</label>
                     <input type="file" id="image" name="image"><br><br>
 
@@ -74,10 +77,12 @@
                 </form>
             </div>
         </div>
-    </main>
 
-    <footer>
-        <p>© 2024 Управление запасами</p>
-    </footer>
+        <!-- Модальное окно для увеличенного изображения -->
+        <div class="image-modal" id="image-modal">
+            <span class="close-image-modal">&times;</span>
+            <img src="" alt="Просмотр изображения">
+        </div>
+    </main>
 </body>
 </html>
