@@ -3,141 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editable Database</title>
+    <title>Управление запасами</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="app.js"></script>
 </head>
 <body>
-    <h1>Редактирование базы данных</h1>
+    <header>
+        <h1>Управление запасами</h1>
+    </header>
 
-    <!-- Форма для добавления данных -->
-    <div class="form-container">
-        <form id="data-form">
-            <label for="number">Номер:</label>
-            <input type="number" id="number" name="number" required><br><br>
-            
-            <label for="name">Наименование:</label>
-            <input type="text" id="name" name="name" required><br><br>
+    <main>
+        <!-- Кнопка для добавления новой записи -->
+        <div class="container">
+            <button class="open-modal-btn" id="open-modal">Добавить новую запись</button>
+        </div>
 
-            <label for="initial-balance">Начальный остаток:</label>
-            <input type="number" id="initial-balance" name="initial-balance" required><br><br>
+        <!-- Список текущих записей -->
+        <h2>Список запасов:</h2>
+        <ul id="data-list" class="data-list"></ul>
 
-            <label for="incoming">Приход:</label>
-            <input type="number" id="incoming" name="incoming" required><br><br>
+        <!-- Модальное окно для добавления данных -->
+        <div class="modal" id="modal">
+            <div class="modal-content">
+                <span class="close-modal" id="close-modal">&times;</span>
+                <h2>Добавить новую запись</h2>
+                <form id="data-form">
+                    <label for="number">Номер:</label>
+                    <input type="number" id="number" name="number" required><br><br>
+                    
+                    <label for="name">Наименование:</label>
+                    <input type="text" id="name" name="name" placeholder="Введите наименование" required><br><br>
 
-            <label for="outgoing">Расход:</label>
-            <input type="number" id="outgoing" name="outgoing" required><br><br>
+                    <label for="initial-balance">Начальный остаток:</label>
+                    <input type="number" id="initial-balance" name="initial-balance" required><br><br>
 
-            <label for="final-balance">Конечный остаток:</label>
-            <input type="number" id="final-balance" name="final-balance" readonly><br><br>
+                    <label for="incoming">Приход:</label>
+                    <input type="number" id="incoming" name="incoming" required><br><br>
 
-            <button type="submit">Сохранить</button>
-        </form>
-    </div>
+                    <label for="outgoing">Расход:</label>
+                    <input type="number" id="outgoing" name="outgoing" required><br><br>
 
-    <h2>Текущие записи:</h2>
-    <ul id="data-list"></ul> <!-- Список данных из Firestore -->
+                    <button type="submit" class="save-btn">Сохранить</button>
+                </form>
+            </div>
+        </div>
+    </main>
 
-    <script type="module">
-      // Импорт необходимых функций Firebase
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
-      import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-
-      // Конфигурация Firebase
-      const firebaseConfig = {
-        apiKey: "AIzaSyCW4FLiBL59useJxL2P9zXu_pQkeMfieW8",
-        authDomain: "editable-db-site.firebaseapp.com",
-        projectId: "editable-db-site",
-        storageBucket: "editable-db-site.appspot.com",
-        messagingSenderId: "508766975047",
-        appId: "1:508766975047:web:bf6dc400c95ed25ca06d62",
-        measurementId: "G-V9XLXKEHC7"
-      };
-
-      // Инициализация Firebase и Firestore
-      const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
-      const db = getFirestore(app);
-
-      // Функция для добавления данных в Firestore
-      async function addData(number, name, initialBalance, incoming, outgoing, finalBalance) {
-        try {
-          const docRef = await addDoc(collection(db, "data"), {
-            number: number,
-            name: name,
-            initialBalance: initialBalance,
-            incoming: incoming,
-            outgoing: outgoing,
-            finalBalance: finalBalance
-          });
-          console.log("Документ добавлен с ID: ", docRef.id);
-          loadData(); // Обновляем список данных
-        } catch (e) {
-          console.error("Ошибка при добавлении документа: ", e);
-        }
-      }
-
-      // Функция для загрузки данных из Firestore
-      async function loadData() {
-        const querySnapshot = await getDocs(collection(db, "data"));
-        const dataList = document.getElementById('data-list');
-        dataList.innerHTML = ''; // Очищаем текущий список
-
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const listItem = document.createElement('li');
-          listItem.innerHTML = `
-            <span>№ ${data.number}: ${data.name} | Начальный остаток: ${data.initialBalance}, Приход: ${data.incoming}, Расход: ${data.outgoing}, Конечный остаток: ${data.finalBalance}</span>
-            <button class="delete-button" data-id="${doc.id}">Удалить</button>
-          `;
-          dataList.appendChild(listItem);
-        });
-
-        // Добавляем обработчик событий для всех кнопок "Удалить"
-        document.querySelectorAll('.delete-button').forEach(button => {
-          button.addEventListener('click', function() {
-            const docId = this.getAttribute('data-id');
-            deleteData(docId);
-          });
-        });
-      }
-
-      // Функция для удаления данных из Firestore
-      async function deleteData(docId) {
-        try {
-          await deleteDoc(doc(db, "data", docId));
-          console.log("Документ с ID: " + docId + " был удален");
-          loadData(); // Обновляем список данных после удаления
-        } catch (e) {
-          console.error("Ошибка при удалении документа: ", e);
-        }
-      }
-
-      // Обработка отправки формы
-      document.getElementById('data-form').addEventListener('submit', function(e) {
-        e.preventDefault(); // Предотвращаем отправку формы по умолчанию
-
-        // Получаем значения из полей формы
-        const number = document.getElementById('number').value;
-        const name = document.getElementById('name').value;
-        const initialBalance = parseFloat(document.getElementById('initial-balance').value);
-        const incoming = parseFloat(document.getElementById('incoming').value);
-        const outgoing = parseFloat(document.getElementById('outgoing').value);
-        const finalBalance = initialBalance + incoming - outgoing;
-
-        // Добавляем данные в Firestore
-        addData(number, name, initialBalance, incoming, outgoing, finalBalance);
-
-        // Очищаем поля формы после отправки
-        document.getElementById('number').value = '';
-        document.getElementById('name').value = '';
-        document.getElementById('initial-balance').value = '';
-        document.getElementById('incoming').value = '';
-        document.getElementById('outgoing').value = '';
-        document.getElementById('final-balance').value = '';
-      });
-
-      // Загружаем данные при старте страницы
-      loadData();
-    </script>
+    <footer>
+        <p>© 2024 Управление запасами</p>
+    </footer>
 </body>
 </html>
