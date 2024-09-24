@@ -3,10 +3,19 @@ body {
     margin: 0;
     padding: 20px;
     background-color: #f4f4f4;
+    text-align: center; /* Центрируем содержимое страницы */
 }
 
 h1 {
     color: #333;
+}
+
+.form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-top: 20px;
 }
 
 form {
@@ -45,9 +54,19 @@ li {
     margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-#notification {
-    margin-top: 10px;
-    font-weight: bold;
+.delete-button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background-color: darkred;
 }
