@@ -13,13 +13,13 @@
     </header>
 
     <main>
-        <!-- Кнопка для добавления новой записи -->
-        <div class="container">
-            <button class="open-modal-btn" id="open-modal">Добавить новую запись</button>
+        <!-- Панель инструментов для добавления и поиска записей -->
+        <div class="toolbar">
+            <button class="add-record-btn" id="open-modal">Добавить новую запись</button>
+            <input type="text" id="search-input" placeholder="Поиск по наименованию...">
         </div>
 
         <!-- Таблица для отображения текущих записей -->
-        <h2>Список запасов:</h2>
         <table id="data-table">
             <thead>
                 <tr>
@@ -33,7 +33,7 @@
                 </tr>
             </thead>
             <tbody id="data-list">
-                <!-- Здесь будут отображаться данные -->
+                <!-- Данные будут динамически подгружаться сюда -->
             </tbody>
         </table>
 
@@ -44,7 +44,7 @@
                 <h2>Добавить новую запись</h2>
                 <form id="data-form">
                     <label for="number">Номер:</label>
-                    <input type="number" id="number" name="number" required><br><br>
+                    <input type="number" id="number" name="number" readonly><br><br>
                     
                     <label for="name">Наименование:</label>
                     <input type="text" id="name" name="name" placeholder="Введите наименование" required><br><br>
