@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 // Конфигурация Firebase
 const firebaseConfig = {
@@ -63,10 +63,10 @@ async function loadData() {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${data.number}</td>
-        <td>${data.name}</td>
-        <td>${data.initialBalance}</td>
-        <td>${data.incoming}</td>
-        <td>${data.outgoing}</td>
+        <td class="editable" data-id="${doc.id}" data-field="name">${data.name}</td>
+        <td class="editable" data-id="${doc.id}" data-field="initialBalance">${data.initialBalance}</td>
+        <td class="editable" data-id="${doc.id}" data-field="incoming">${data.incoming}</td>
+        <td class="editable" data-id="${doc.id}" data-field="outgoing">${data.outgoing}</td>
         <td>${data.finalBalance}</td>
         <td><button class="delete-button" data-id="${doc.id}">Удалить</button></td>
       `;
@@ -80,9 +80,54 @@ async function loadData() {
         deleteData(docId);
       });
     });
+
+    // Добавляем возможность редактирования ячеек
+    document.querySelectorAll('.editable').forEach(cell => {
+      cell.addEventListener('click', handleCellEdit);
+    });
+
   } catch (e) {
     console.error("Ошибка при загрузке данных: ", e);
   }
+}
+
+// Обработчик редактирования ячеек
+function handleCellEdit(event) {
+  const cell = event.target;
+  const originalValue = cell.textContent;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = originalValue;
+  cell.textContent = ''; // Очищаем ячейку перед вставкой инпута
+  cell.appendChild(input);
+  input.focus();
+
+  // Обработка завершения редактирования
+  input.addEventListener('blur', async () => {
+    const newValue = input.value.trim();
+    if (newValue !== originalValue) {
+      const docId = cell.getAttribute('data-id');
+      const field = cell.getAttribute('data-field');
+      const fieldValue = isNaN(parseFloat(newValue)) ? newValue : parseFloat(newValue); // Проверка, если это число или текст
+      await updateDoc(doc(db, "data", docId), { [field]: fieldValue });
+
+      // Пересчитываем конечный остаток, если изменены приход, расход или начальный остаток
+      if (['initialBalance', 'incoming', 'outgoing'].includes(field)) {
+        const updatedDoc = await getDoc(doc(db, "data", docId));
+        const updatedData = updatedDoc.data();
+        const finalBalance = updatedData.initialBalance + updatedData.incoming - updatedData.outgoing;
+        await updateDoc(doc(db, "data", docId), { finalBalance: finalBalance });
+      }
+    }
+    loadData(); // Обновляем данные
+  });
+
+  // Если нажата клавиша Enter
+  input.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      input.blur();
+    }
+  });
 }
 
 // Функция для удаления данных
@@ -136,17 +181,6 @@ document.getElementById('data-form').addEventListener('submit', async function(e
   document.getElementById('initial-balance').value = '';
   document.getElementById('incoming').value = '';
   document.getElementById('outgoing').value = '';
-});
-
-// Поиск по наименованию
-document.getElementById('search-input').addEventListener('input', function() {
-  const searchValue = this.value.toLowerCase();
-  const rows = document.querySelectorAll('#data-list tr');
-
-  rows.forEach(row => {
-    const nameCell = row.querySelector('td:nth-child(2)');
-    const name = nameCell.textContent.toLowerCase();
-    row.style.display = name.includes(searchValue) ? '' : 'none';
 });
 
 // Загружаем данные при старте страницы
