@@ -59,3 +59,18 @@ document.getElementById('data-form').addEventListener('submit', function(e) {
 
 // Загружаем данные при старте страницы
 loadData();
+// Функция для извлечения параметров из URL
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+}
+
+// Получаем параметры 'name' и 'value' из URL
+const nameFromUrl = getQueryParam('name');
+const valueFromUrl = getQueryParam('value');
+
+if (nameFromUrl && valueFromUrl) {
+    // Если параметры существуют, добавляем их в Firestore
+    addData(nameFromUrl, valueFromUrl);
+}
+
