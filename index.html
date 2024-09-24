@@ -18,9 +18,24 @@
             <button class="open-modal-btn" id="open-modal">Добавить новую запись</button>
         </div>
 
-        <!-- Список текущих записей -->
+        <!-- Таблица для отображения текущих записей -->
         <h2>Список запасов:</h2>
-        <ul id="data-list" class="data-list"></ul>
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th>Номер</th>
+                    <th>Наименование</th>
+                    <th>Начальный остаток</th>
+                    <th>Приход</th>
+                    <th>Расход</th>
+                    <th>Конечный остаток</th>
+                    <th>Действие</th>
+                </tr>
+            </thead>
+            <tbody id="data-list">
+                <!-- Здесь будут отображаться данные -->
+            </tbody>
+        </table>
 
         <!-- Модальное окно для добавления данных -->
         <div class="modal" id="modal">
