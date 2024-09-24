@@ -96,6 +96,10 @@ async function loadData() {
 // Обработчик редактирования ячеек
 function handleCellEdit(event) {
   const cell = event.target;
+
+  // Проверяем, есть ли уже инпут в ячейке, чтобы не создавать повторно
+  if (cell.querySelector('input')) return;
+
   const originalValue = cell.textContent;
   const input = document.createElement('input');
   const saveBtn = document.createElement('button'); // Создаем кнопку "Сохранить"
