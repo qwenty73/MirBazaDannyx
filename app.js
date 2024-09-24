@@ -22,15 +22,23 @@ const storage = getStorage(app);
 const modal = document.getElementById('modal');
 const openModalBtn = document.getElementById('open-modal');
 const closeModalBtn = document.getElementById('close-modal');
-const imageModal = document.getElementById('image-modal');
-const modalImage = document.getElementById('modal-image');
-const closeImageModal = document.getElementById('close-image-modal');
+
+// Модальное окно для изображения
+const imageModal = document.createElement('div');
+imageModal.className = 'image-modal';
+imageModal.innerHTML = `
+  <span class="close-image-modal">&times;</span>
+  <img src="" alt="Просмотр изображения">
+`;
+document.body.appendChild(imageModal);
+
+const closeImageModalBtn = imageModal.querySelector('.close-image-modal');
+const modalImage = imageModal.querySelector('img');
 
 // Открытие модального окна для добавления новой записи
 openModalBtn.addEventListener('click', async () => {
-  document.getElementById('doc-id').value = ''; // Очистить скрытое поле ID документа
-  const nextNumber = await getNextNumber(); // Получаем следующий номер
-  document.getElementById('number').value = nextNumber; // Устанавливаем значение в поле номера
+  const nextNumber = await getNextNumber();
+  document.getElementById('number').value = nextNumber;
   modal.style.display = 'flex';
 });
 
@@ -39,50 +47,37 @@ closeModalBtn.addEventListener('click', () => {
   modal.style.display = 'none';
 });
 
-// Закрытие модального окна с изображением
-closeImageModal.addEventListener('click', () => {
+// Закрытие модального окна для изображения
+closeImageModalBtn.addEventListener('click', () => {
   imageModal.style.display = 'none';
 });
 
 // Функция для автоматического получения следующего номера
 async function getNextNumber() {
-  const q = query(collection(db, "data"), orderBy("number", "desc"), limit(1)); // Находим запись с максимальным номером
+  const q = query(collection(db, "data"), orderBy("number", "desc"), limit(1));
   const querySnapshot = await getDocs(q);
-
   if (!querySnapshot.empty) {
     const lastDoc = querySnapshot.docs[0].data();
-    return lastDoc.number + 1; // Возвращаем следующий номер
+    return lastDoc.number + 1;
   } else {
-    return 1; // Если записей нет, начинаем с 1
+    return 1;
   }
 }
 
-// Функция для добавления/обновления данных
-async function saveData(docId, number, name, initialBalance, incoming, outgoing, finalBalance, imageUrl) {
+// Функция для добавления данных
+async function addData(number, name, initialBalance, incoming, outgoing, finalBalance, imageUrl) {
   try {
-    if (docId) {
-      await updateDoc(doc(db, "data", docId), {
-        number,
-        name,
-        initialBalance,
-        incoming,
-        outgoing,
-        finalBalance,
-        imageUrl
-      });
-    } else {
-      await addDoc(collection(db, "data"), {
-        number,
-        name,
-        initialBalance,
-        incoming,
-        outgoing,
-        finalBalance,
-        imageUrl
-      });
-    }
-    loadData(); // Обновляем список данных
-    modal.style.display = 'none'; // Закрываем модальное окно после успешного добавления
+    await addDoc(collection(db, "data"), {
+      number,
+      name,
+      initialBalance,
+      incoming,
+      outgoing,
+      finalBalance,
+      imageUrl
+    });
+    loadData();
+    modal.style.display = 'none';
   } catch (e) {
     console.error("Ошибка при добавлении документа: ", e);
     alert("Ошибка при добавлении данных.");
@@ -93,46 +88,40 @@ async function saveData(docId, number, name, initialBalance, incoming, outgoing,
 async function uploadImage(file) {
   const storageRef = ref(storage, 'images/' + file.name);
   const snapshot = await uploadBytes(storageRef, file);
-  return await getDownloadURL(snapshot.ref); // Возвращаем URL загруженного изображения
+  return await getDownloadURL(snapshot.ref);
 }
 
 // Обработка отправки формы
 document.getElementById('data-form').addEventListener('submit', async function(e) {
   e.preventDefault();
-
-  // Получаем значения из полей формы
-  const docId = document.getElementById('doc-id').value;
   const number = parseInt(document.getElementById('number').value);
   const name = document.getElementById('name').value;
   const initialBalance = parseFloat(document.getElementById('initial-balance').value);
   const incoming = parseFloat(document.getElementById('incoming').value);
   const outgoing = parseFloat(document.getElementById('outgoing').value);
-  const file = document.getElementById('image').files[0]; // Получаем выбранный файл
+  const file = document.getElementById('image').files[0];
 
   if (!name || isNaN(initialBalance) || isNaN(incoming) || isNaN(outgoing)) {
     alert('Пожалуйста, заполните все поля правильно.');
     return;
   }
 
-  // Загружаем изображение и получаем его URL
   let imageUrl = '';
   if (file) {
     imageUrl = await uploadImage(file);
   }
 
   const finalBalance = initialBalance + incoming - outgoing;
+  await addData(number, name, initialBalance, incoming, outgoing, finalBalance, imageUrl);
 
-  // Сохраняем данные в Firestore
-  await saveData(docId, number, name, initialBalance, incoming, outgoing, finalBalance, imageUrl);
-
-  // Очищаем поля формы
-  document.getElementById('doc-id').value = '';
   document.getElementById('number').value = '';
   document.getElementById('name').value = '';
   document.getElementById('initial-balance').value = '';
   document.getElementById('incoming').value = '';
   document.getElementById('outgoing').value = '';
-  document.getElementById('image').value = ''; // Очищаем поле выбора файла
+  document.getElementById('image').value = '';
+
+  loadData();
 });
 
 // Функция для загрузки данных
@@ -140,7 +129,7 @@ async function loadData() {
   const q = query(collection(db, "data"), orderBy("number", "asc"));
   const querySnapshot = await getDocs(q);
   const dataList = document.getElementById('data-list');
-  dataList.innerHTML = ''; // Очищаем список
+  dataList.innerHTML = '';
 
   querySnapshot.forEach((docSnapshot) => {
     const data = docSnapshot.data();
@@ -152,7 +141,9 @@ async function loadData() {
       <td class="editable" data-id="${docSnapshot.id}" data-field="incoming">${data.incoming}</td>
       <td class="editable" data-id="${docSnapshot.id}" data-field="outgoing">${data.outgoing}</td>
       <td>${data.finalBalance}</td>
-      <td>${data.imageUrl ? `<img src="${data.imageUrl}" class="image-preview" alt="image" width="50">` : 'Нет изображения'}</td>
+      <td>
+        ${data.imageUrl ? `<img src="${data.imageUrl}" alt="image" class="clickable-image" width="50">` : 'Нет изображения'}
+      </td>
       <td>
         <button class="edit-button" data-id="${docSnapshot.id}">Редактировать</button>
         <button class="delete-button" data-id="${docSnapshot.id}">Удалить</button>
@@ -161,7 +152,6 @@ async function loadData() {
     dataList.appendChild(row);
   });
 
-  // Добавляем обработчики для удаления и редактирования
   document.querySelectorAll('.delete-button').forEach(button => {
     button.addEventListener('click', function() {
       const docId = this.getAttribute('data-id');
@@ -169,45 +159,99 @@ async function loadData() {
     });
   });
 
-  document.querySelectorAll('.edit-button').forEach(button => {
-    button.addEventListener('click', async function() {
-      const docId = this.getAttribute('data-id');
-      const docRef = doc(db, "data", docId);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        document.getElementById('doc-id').value = docId;
-        document.getElementById('number').value = data.number;
-        document.getElementById('name').value = data.name;
-        document.getElementById('initial-balance').value = data.initialBalance;
-        document.getElementById('incoming').value = data.incoming;
-        document.getElementById('outgoing').value = data.outgoing;
-        modal.style.display = 'flex';
-      } else {
-        alert("Запись не найдена.");
-      }
+  document.querySelectorAll('.clickable-image').forEach(image => {
+    image.addEventListener('click', function() {
+      modalImage.src = this.src;
+      imageModal.style.display = 'flex'; // Открываем модальное окно с изображением
     });
   });
 
-  // Добавляем обработчик для увеличения изображений
-  document.querySelectorAll('.image-preview').forEach(image => {
-    image.addEventListener('click', function() {
-      modalImage.src = this.src;
-      imageModal.style.display = 'block';
+  document.querySelectorAll('.edit-button').forEach(button => {
+    button.addEventListener('click', function() {
+      const docId = this.getAttribute('data-id');
+      editData(docId);
     });
   });
+
+  // Добавляем возможность редактирования ячеек
+  document.querySelectorAll('.editable').forEach(cell => {
+    cell.addEventListener('click', handleCellEdit);
+  });
+}
+
+// Обработчик редактирования ячеек
+function handleCellEdit(event) {
+  const cell = event.target;
+
+  if (cell.querySelector('input')) return;
+
+  const originalValue = cell.textContent;
+  const input = document.createElement('input');
+  const saveBtn = document.createElement('button');
+  input.type = 'text';
+  input.value = originalValue;
+  saveBtn.textContent = 'ОК';
+  saveBtn.className = 'save-button';
+  
+  cell.textContent = '';
+  cell.appendChild(input);
+  cell.appendChild(saveBtn);
+  input.focus();
+
+  saveBtn.addEventListener('click', async () => {
+    const newValue = input.value.trim();
+    if (newValue !== originalValue) {
+      const docId = cell.getAttribute('data-id');
+      const field = cell.getAttribute('data-field');
+      const fieldValue = isNaN(parseFloat(newValue)) ? newValue : parseFloat(newValue);
+      await updateDoc(doc(db, "data", docId), { [field]: fieldValue });
+
+      if (['initialBalance', 'incoming', 'outgoing'].includes(field)) {
+        const updatedDoc = await getDoc(doc(db, "data", docId));
+        const updatedData = updatedDoc.data();
+        const finalBalance = updatedData.initialBalance + updatedData.incoming - updatedData.outgoing;
+        await updateDoc(doc(db, "data", docId), { finalBalance: finalBalance });
+      }
+    }
+    loadData();
+  });
+
+  input.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      saveBtn.click();
+    }
+  });
+}
+
+// Функция для редактирования записи
+async function editData(docId) {
+  const docRef = doc(db, "data", docId);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    const nameField = document.querySelector(`td[data-id='${docId}'][data-field='name']`);
+    const initialBalanceField = document.querySelector(`td[data-id='${docId}'][data-field='initialBalance']`);
+    const incomingField = document.querySelector(`td[data-id='${docId}'][data-field='incoming']`);
+    const outgoingField = document.querySelector(`td[data-id='${docId}'][data-field='outgoing']`);
+
+    // Устанавливаем поля для редактирования
+    nameField.innerHTML = `<input type="text" value="${data.name}">`;
+    initialBalanceField.innerHTML = `<input type="number" value="${data.initialBalance}">`;
+    incomingField.innerHTML = `<input type="number" value="${data.incoming}">`;
+    outgoingField.innerHTML = `<input type="number" value="${data.outgoing}">`;
+  }
 }
 
 // Функция для удаления данных
 async function deleteData(docId) {
   try {
     await deleteDoc(doc(db, "data", docId));
-    loadData(); // Обновляем список данных
+    loadData();
   } catch (e) {
     console.error("Ошибка при удалении документа: ", e);
     alert("Ошибка при удалении данных.");
   }
 }
 
-// Загружаем данные при старте страницы
 loadData();
