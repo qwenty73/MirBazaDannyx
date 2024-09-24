@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 // Конфигурация Firebase
 const firebaseConfig = {
@@ -51,16 +51,16 @@ async function addData(number, name, initialBalance, incoming, outgoing, finalBa
 // Функция для загрузки данных из Firestore
 async function loadData() {
   try {
-    const q = query(collection(db, "data"), orderBy("number", "asc")); // Сортируем по возрастанию поля "number"
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await getDocs(collection(db, "data"));
     const dataList = document.getElementById('data-list');
     dataList.innerHTML = ''; // Очищаем текущий список
 
+    let index = 1; // Счётчик для нумерации
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td>${data.number}</td>
+        <td>${index}</td>
         <td>${data.name}</td>
         <td>${data.initialBalance}</td>
         <td>${data.incoming}</td>
@@ -69,6 +69,7 @@ async function loadData() {
         <td><button class="delete-button" data-id="${doc.id}">Удалить</button></td>
       `;
       dataList.appendChild(row);
+      index++; // Увеличиваем индекс для следующей записи
     });
 
     // Добавляем обработчик событий для всех кнопок "Удалить"
@@ -94,17 +95,10 @@ async function deleteData(docId) {
   }
 }
 
-// Функция для автоматического определения следующего номера
+// Функция для автоматического получения текущей позиции (последовательного номера)
 async function getNextNumber() {
-  const q = query(collection(db, "data"), orderBy("number", "desc"), limit(1)); // Находим последнюю запись
-  const querySnapshot = await getDocs(q);
-  
-  if (!querySnapshot.empty) {
-    const lastDoc = querySnapshot.docs[0].data();
-    return lastDoc.number + 1; // Возвращаем следующий номер
-  } else {
-    return 1; // Если записей нет, возвращаем 1
-  }
+  const querySnapshot = await getDocs(collection(db, "data"));
+  return querySnapshot.size + 1; // Следующий номер - это количество текущих записей + 1
 }
 
 // Обработка отправки формы
