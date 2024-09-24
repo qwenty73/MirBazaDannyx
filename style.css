@@ -51,6 +51,7 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    table-layout: fixed; /* Устанавливаем фиксированную ширину колонок */
 }
 
 table, th, td {
@@ -60,6 +61,7 @@ table, th, td {
 th, td {
     padding: 12px;
     text-align: center;
+    word-wrap: break-word; /* Перенос слов в колонках */
 }
 
 th {
