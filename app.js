@@ -21,7 +21,10 @@ const modal = document.getElementById('modal');
 const openModalBtn = document.getElementById('open-modal');
 const closeModalBtn = document.getElementById('close-modal');
 
-openModalBtn.addEventListener('click', () => {
+// При открытии модального окна автоматически задаём следующий номер
+openModalBtn.addEventListener('click', async () => {
+  const nextNumber = await getNextNumber(); // Получаем следующий номер
+  document.getElementById('number').value = nextNumber; // Устанавливаем значение в поле номера
   modal.style.display = 'flex';
 });
 
@@ -33,7 +36,7 @@ closeModalBtn.addEventListener('click', () => {
 async function addData(number, name, initialBalance, incoming, outgoing, finalBalance) {
   try {
     await addDoc(collection(db, "data"), {
-      number: number,  // сохраняем номер
+      number: number,
       name: name,
       initialBalance: initialBalance,
       incoming: incoming,
@@ -60,7 +63,7 @@ async function loadData() {
       const data = doc.data();
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td>${data.number}</td> <!-- Правильный номер из базы данных -->
+        <td>${data.number}</td>
         <td>${data.name}</td>
         <td>${data.initialBalance}</td>
         <td>${data.incoming}</td>
@@ -96,8 +99,15 @@ async function deleteData(docId) {
 
 // Функция для автоматического получения следующего номера
 async function getNextNumber() {
-  const querySnapshot = await getDocs(collection(db, "data"));
-  return querySnapshot.size + 1; // Следующий номер - это количество текущих записей + 1
+  const q = query(collection(db, "data"), orderBy("number", "desc"), limit(1)); // Находим запись с максимальным номером
+  const querySnapshot = await getDocs(q);
+
+  if (!querySnapshot.empty) {
+    const lastDoc = querySnapshot.docs[0].data();
+    return lastDoc.number + 1; // Возвращаем следующий номер
+  } else {
+    return 1; // Если записей нет, начинаем с 1
+  }
 }
 
 // Обработка отправки формы
@@ -105,6 +115,7 @@ document.getElementById('data-form').addEventListener('submit', async function(e
   e.preventDefault();
 
   // Получаем значения из полей формы
+  const number = parseInt(document.getElementById('number').value);
   const name = document.getElementById('name').value;
   const initialBalance = parseFloat(document.getElementById('initial-balance').value);
   const incoming = parseFloat(document.getElementById('incoming').value);
@@ -117,13 +128,11 @@ document.getElementById('data-form').addEventListener('submit', async function(e
 
   const finalBalance = initialBalance + incoming - outgoing;
 
-  // Получаем следующий номер автоматически
-  const nextNumber = await getNextNumber();
-
   // Добавляем данные в Firestore
-  addData(nextNumber, name, initialBalance, incoming, outgoing, finalBalance);
+  addData(number, name, initialBalance, incoming, outgoing, finalBalance);
 
   // Очищаем поля формы
+  document.getElementById('number').value = '';
   document.getElementById('name').value = '';
   document.getElementById('initial-balance').value = '';
   document.getElementById('incoming').value = '';
