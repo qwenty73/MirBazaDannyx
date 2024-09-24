@@ -10,8 +10,8 @@ const firebaseConfig = {
 };
 
 // Инициализация Firebase
-const app = firebase.initializeApp(firebaseConfig);
-const analytics = firebase.analytics();
+firebase.initializeApp(firebaseConfig);
+firebase.analytics();
 const db = firebase.firestore();
 
 // Функция для добавления данных в Firestore
