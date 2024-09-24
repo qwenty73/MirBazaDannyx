@@ -54,12 +54,17 @@ async function loadData() {
 
   querySnapshot.forEach((doc) => {
     const data = doc.data();
-    const listItem = document.createElement('li');
-    listItem.innerHTML = `
-      <span>№ ${data.number}: ${data.name} | Начальный остаток: ${data.initialBalance}, Приход: ${data.incoming}, Расход: ${data.outgoing}, Конечный остаток: ${data.finalBalance}</span>
-      <button class="delete-button" data-id="${doc.id}">Удалить</button>
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${data.number}</td>
+      <td>${data.name}</td>
+      <td>${data.initialBalance}</td>
+      <td>${data.incoming}</td>
+      <td>${data.outgoing}</td>
+      <td>${data.finalBalance}</td>
+      <td><button class="delete-button" data-id="${doc.id}">Удалить</button></td>
     `;
-    dataList.appendChild(listItem);
+    dataList.appendChild(row);
   });
 
   // Добавляем обработчик событий для всех кнопок "Удалить"
