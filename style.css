@@ -46,28 +46,33 @@ button:hover {
     background-color: #0056b3;
 }
 
-ul.data-list {
-    list-style: none;
-    padding: 0;
-    text-align: left;
-    margin: 20px auto;
-    max-width: 600px;
+/* Стили для таблицы */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
 }
 
-li {
-    background-color: white;
-    margin-bottom: 10px;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+table, th, td {
+    border: 1px solid #ddd;
 }
 
-li span {
+th, td {
+    padding: 12px;
+    text-align: center;
+}
+
+th {
+    background-color: #f4f4f4;
     font-weight: bold;
-    color: #333;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
 }
 
 .delete-button {
