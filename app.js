@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 // Конфигурация Firebase
 const firebaseConfig = {
@@ -51,7 +51,8 @@ async function addData(number, name, initialBalance, incoming, outgoing, finalBa
 // Функция для загрузки данных из Firestore
 async function loadData() {
   try {
-    const querySnapshot = await getDocs(collection(db, "data"));
+    const q = query(collection(db, "data"), orderBy("number", "asc")); // Сортируем по возрастанию поля "number"
+    const querySnapshot = await getDocs(q);
     const dataList = document.getElementById('data-list');
     dataList.innerHTML = ''; // Очищаем текущий список
 
@@ -93,29 +94,43 @@ async function deleteData(docId) {
   }
 }
 
+// Функция для автоматического определения следующего номера
+async function getNextNumber() {
+  const q = query(collection(db, "data"), orderBy("number", "desc"), limit(1)); // Находим последнюю запись
+  const querySnapshot = await getDocs(q);
+  
+  if (!querySnapshot.empty) {
+    const lastDoc = querySnapshot.docs[0].data();
+    return lastDoc.number + 1; // Возвращаем следующий номер
+  } else {
+    return 1; // Если записей нет, возвращаем 1
+  }
+}
+
 // Обработка отправки формы
-document.getElementById('data-form').addEventListener('submit', function(e) {
+document.getElementById('data-form').addEventListener('submit', async function(e) {
   e.preventDefault();
 
   // Получаем значения из полей формы
-  const number = document.getElementById('number').value;
   const name = document.getElementById('name').value;
   const initialBalance = parseFloat(document.getElementById('initial-balance').value);
   const incoming = parseFloat(document.getElementById('incoming').value);
   const outgoing = parseFloat(document.getElementById('outgoing').value);
 
-  if (!number || !name || isNaN(initialBalance) || isNaN(incoming) || isNaN(outgoing)) {
+  if (!name || isNaN(initialBalance) || isNaN(incoming) || isNaN(outgoing)) {
     alert('Пожалуйста, заполните все поля правильно.');
     return;
   }
 
   const finalBalance = initialBalance + incoming - outgoing;
 
+  // Получаем следующий номер автоматически
+  const nextNumber = await getNextNumber();
+
   // Добавляем данные в Firestore
-  addData(number, name, initialBalance, incoming, outgoing, finalBalance);
+  addData(nextNumber, name, initialBalance, incoming, outgoing, finalBalance);
 
   // Очищаем поля формы
-  document.getElementById('number').value = '';
   document.getElementById('name').value = '';
   document.getElementById('initial-balance').value = '';
   document.getElementById('incoming').value = '';
