@@ -13,14 +13,18 @@
 <body>
     <h1>Редактирование базы данных</h1>
 
-    <!-- Форма для добавления данных -->
-    <form id="data-form">
-        <label for="name">Название:</label>
-        <input type="text" id="name" name="name" required>
-        <label for="value">Значение:</label>
-        <input type="text" id="value" name="value" required>
-        <button type="submit">Сохранить</button>
-    </form>
+    <!-- Центрируем форму для добавления данных -->
+    <div class="form-container">
+        <form id="data-form">
+            <label for="name">Название:</label>
+            <input type="text" id="name" name="name" required>
+            <br><br>
+            <label for="value">Значение:</label>
+            <input type="text" id="value" name="value" required>
+            <br><br>
+            <button type="submit">Сохранить</button>
+        </form>
+    </div>
 
     <h2>Текущие записи:</h2>
     <ul id="data-list"></ul> <!-- Список данных из Firestore -->
