@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, limit, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 // Конфигурация Firebase
 const firebaseConfig = {
@@ -98,14 +98,19 @@ function handleCellEdit(event) {
   const cell = event.target;
   const originalValue = cell.textContent;
   const input = document.createElement('input');
+  const saveBtn = document.createElement('button'); // Создаем кнопку "Сохранить"
   input.type = 'text';
   input.value = originalValue;
+  saveBtn.textContent = 'ОК'; // Назначаем текст для кнопки
+  saveBtn.className = 'save-button'; // Назначаем стиль кнопке
+  
   cell.textContent = ''; // Очищаем ячейку перед вставкой инпута
   cell.appendChild(input);
+  cell.appendChild(saveBtn);
   input.focus();
 
-  // Обработка завершения редактирования
-  input.addEventListener('blur', async () => {
+  // Обработка завершения редактирования по нажатию "ОК"
+  saveBtn.addEventListener('click', async () => {
     const newValue = input.value.trim();
     if (newValue !== originalValue) {
       const docId = cell.getAttribute('data-id');
@@ -127,7 +132,7 @@ function handleCellEdit(event) {
   // Если нажата клавиша Enter
   input.addEventListener('keydown', function(event) {
     if (event.key === 'Enter') {
-      input.blur();
+      saveBtn.click(); // Имитация клика на "ОК"
     }
   });
 }
