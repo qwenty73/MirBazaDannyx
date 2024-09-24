@@ -58,17 +58,17 @@ async function loadData() {
     const dataList = document.getElementById('data-list');
     dataList.innerHTML = ''; // Очищаем текущий список
 
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
+    querySnapshot.forEach((docSnapshot) => {
+      const data = docSnapshot.data();
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${data.number}</td>
-        <td class="editable" data-id="${doc.id}" data-field="name">${data.name}</td>
-        <td class="editable" data-id="${doc.id}" data-field="initialBalance">${data.initialBalance}</td>
-        <td class="editable" data-id="${doc.id}" data-field="incoming">${data.incoming}</td>
-        <td class="editable" data-id="${doc.id}" data-field="outgoing">${data.outgoing}</td>
+        <td class="editable" data-id="${docSnapshot.id}" data-field="name">${data.name}</td>
+        <td class="editable" data-id="${docSnapshot.id}" data-field="initialBalance">${data.initialBalance}</td>
+        <td class="editable" data-id="${docSnapshot.id}" data-field="incoming">${data.incoming}</td>
+        <td class="editable" data-id="${docSnapshot.id}" data-field="outgoing">${data.outgoing}</td>
         <td>${data.finalBalance}</td>
-        <td><button class="delete-button" data-id="${doc.id}">Удалить</button></td>
+        <td><button class="delete-button" data-id="${docSnapshot.id}">Удалить</button></td>
       `;
       dataList.appendChild(row);
     });
