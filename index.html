@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editable Database</title>
+    <!-- Подключаем Firebase SDK через CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Редактирование базы данных</h1>
-
-    <!-- Кнопка для авторизации -->
-    <button id="login-btn">Войти</button>
-    <button id="logout-btn" style="display:none;">Выйти</button>
 
     <!-- Форма для добавления данных -->
     <form id="data-form">
@@ -22,12 +22,9 @@
         <button type="submit">Сохранить</button>
     </form>
 
-    <!-- Уведомления -->
-    <p id="notification" style="color: green; display: none;"></p>
-
     <h2>Текущие записи:</h2>
     <ul id="data-list"></ul> <!-- Список данных из Firestore -->
 
-    <script type="module" src="app.js"></script> <!-- Подключение JS -->
+    <script src="app.js"></script> <!-- Подключаем ваш JavaScript код -->
 </body>
 </html>
