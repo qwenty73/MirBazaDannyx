@@ -1,7 +1,3 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
-
 // Firebase конфигурация
 const firebaseConfig = {
   apiKey: "AIzaSyCW4FLiBL59useJxL2P9zXu_pQkeMfieW8",
@@ -14,33 +10,27 @@ const firebaseConfig = {
 };
 
 // Инициализация Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-// Элементы DOM
-const loginBtn = document.getElementById('login-btn');
-const logoutBtn = document.getElementById('logout-btn');
-const notification = document.getElementById('notification');
+const app = firebase.initializeApp(firebaseConfig);
+const analytics = firebase.analytics();
+const db = firebase.firestore();
 
 // Функция для добавления данных в Firestore
 async function addData(name, value) {
     try {
-        const docRef = await addDoc(collection(db, "data"), {
+        const docRef = await db.collection("data").add({
             name: name,
             value: value
         });
-        console.log("Document written with ID: ", docRef.id);
-        showNotification("Данные успешно добавлены!");
+        console.log("Документ добавлен с ID: ", docRef.id);
+        loadData();
     } catch (e) {
-        console.error("Error adding document: ", e);
+        console.error("Ошибка при добавлении документа: ", e);
     }
 }
 
 // Функция для загрузки данных из Firestore
 async function loadData() {
-    const querySnapshot = await getDocs(collection(db, "data"));
+    const querySnapshot = await db.collection("data").get();
     const dataList = document.getElementById('data-list');
     dataList.innerHTML = ''; // Очищаем текущий список
     querySnapshot.forEach((doc) => {
@@ -49,15 +39,6 @@ async function loadData() {
         newItem.textContent = `${data.name}: ${data.value}`;
         dataList.appendChild(newItem);
     });
-}
-
-// Функция для отображения уведомлений
-function showNotification(message) {
-    notification.textContent = message;
-    notification.style.display = 'block';
-    setTimeout(() => {
-        notification.style.display = 'none';
-    }, 3000);
 }
 
 // Обработка события отправки формы
@@ -69,41 +50,12 @@ document.getElementById('data-form').addEventListener('submit', function(e) {
 
     if (name && value) {
         // Добавляем данные в Firestore
-        addData(name, value).then(() => {
-            // Загружаем обновленные данные
-            loadData();
-        });
-
+        addData(name, value);
         // Очистка полей
         document.getElementById('name').value = '';
         document.getElementById('value').value = '';
     }
 });
 
-// Авторизация через Google
-loginBtn.addEventListener('click', () => {
-    signInWithPopup(auth, provider)
-    .then((result) => {
-        loginBtn.style.display = 'none';
-        logoutBtn.style.display = 'block';
-        showNotification(`Вы вошли как ${result.user.displayName}`);
-    }).catch((error) => {
-        console.error(error);
-        showNotification("Ошибка при входе");
-    });
-});
-
-// Выход из системы
-logoutBtn.addEventListener('click', () => {
-    signOut(auth).then(() => {
-        loginBtn.style.display = 'block';
-        logoutBtn.style.display = 'none';
-        showNotification("Вы успешно вышли");
-    }).catch((error) => {
-        console.error(error);
-        showNotification("Ошибка при выходе");
-    });
-});
-
-// Загрузка данных при загрузке страницы
+// Загружаем данные при старте страницы
 loadData();
