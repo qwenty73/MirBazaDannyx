@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 // Конфигурация Firebase
 const firebaseConfig = {
@@ -21,7 +21,6 @@ const modal = document.getElementById('modal');
 const openModalBtn = document.getElementById('open-modal');
 const closeModalBtn = document.getElementById('close-modal');
 
-// При открытии модального окна автоматически задаём следующий номер
 openModalBtn.addEventListener('click', async () => {
   const nextNumber = await getNextNumber(); // Получаем следующий номер
   document.getElementById('number').value = nextNumber; // Устанавливаем значение в поле номера
@@ -137,6 +136,17 @@ document.getElementById('data-form').addEventListener('submit', async function(e
   document.getElementById('initial-balance').value = '';
   document.getElementById('incoming').value = '';
   document.getElementById('outgoing').value = '';
+});
+
+// Поиск по наименованию
+document.getElementById('search-input').addEventListener('input', function() {
+  const searchValue = this.value.toLowerCase();
+  const rows = document.querySelectorAll('#data-list tr');
+
+  rows.forEach(row => {
+    const nameCell = row.querySelector('td:nth-child(2)');
+    const name = nameCell.textContent.toLowerCase();
+    row.style.display = name.includes(searchValue) ? '' : 'none';
 });
 
 // Загружаем данные при старте страницы
